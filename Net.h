@@ -14,8 +14,8 @@ In this project was been used method of back propagation.
 #include <string>
 
 
-double Neuron::epsi = 0.7;
-double Neuron::alpha = 0.3;
+double Neuron::epsi = 0.5;
+double Neuron::alpha = 0.5;
 
 class Net
 {
@@ -31,6 +31,7 @@ public:
 	void getResults();//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
 	double findError(const std::vector<double>& targetVals);
 	void save_weight_and_topology(std::string path);//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
+	void trening(std::vector<double>& inputVals, std::vector<double>& targetVals, unsigned int epoch);//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 
 };
 
@@ -64,7 +65,7 @@ void Net::feedForward(std::vector<double>& inputVals)//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï
 
 	for (int layerNum = 1; layerNum < layers.size(); ++layerNum)
 	{
-		Layer prevLayer = layers[layerNum - 1];
+		Layer& prevLayer = layers[layerNum - 1];
 		for (int neuronNum = 0; neuronNum < layers[layerNum].size(); ++neuronNum)
 		{
 			layers[layerNum][neuronNum].feedForvard(prevLayer);
@@ -74,11 +75,12 @@ void Net::feedForward(std::vector<double>& inputVals)//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï
 
 void Net::getResults()//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ - ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½
 {
-	int sizeOfNEt = layers.size();//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ = ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
-	int numNeurons = layers.back().size();//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
-	for (int i = 0; i < numNeurons; ++i)
+	int lastLayer = layers.size() - 1;;//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ = ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
+	int sizeOfLastLayers = layers.back().size();;//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
+	std::cout << " Result:\n";
+	for (int numNeurons = 0; numNeurons < sizeOfLastLayers; ++numNeurons)
 	{
-		std::cout << layers[sizeOfNEt - 1][numNeurons].getOutoutValue() << " ";
+		std::cout << numNeurons + 1 << ")" << std::to_string(layers[lastLayer][numNeurons].getOutoutValue()) << " ";
 	}
 }
 
@@ -88,13 +90,15 @@ double Net::findError(const std::vector<double>& targetVals)//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 
 	int sizeOfLastLayers = layers.back().size();
 	int lastLayer = layers.size() - 1;
+	this->Error = 0.0;
 
 	for (int i = 0; i < sizeOfLastLayers; ++i)
 	{
-		this->Error += targetVals[i] - layers[lastLayer][i].getOutoutValue();
+		this->Error += pow(targetVals[i] - layers[lastLayer][i].getOutoutValue(), 2);
 	}
 
-	this->Error /= layers.back().size();
+	this->Error /= 2;
+	//this->Error /= layers.back().size();
 	return this->Error;
 }
 
@@ -113,10 +117,10 @@ void Net::back_Prop(const std::vector<double>& targetVals)//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿
 
 	//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½: ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½
 	int startLayer = layers.size() - 2;//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½
-	for (int numLayer = startLayer; numLayer > 0; --numLayer)
+	for (int numLayer = startLayer; numLayer >= 0; --numLayer)
 	{
-		Layer prevLayer = layers[numLayer + 1];//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
-		Layer presentLayer = layers[numLayer];//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
+		Layer& prevLayer = layers[numLayer + 1];//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
+		Layer& presentLayer = layers[numLayer];//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
 		int sizeOfLayer = layers[numLayer].size();//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
 		for (int numNeuron = 0; numNeuron < sizeOfLayer; ++numNeuron)
 		{
@@ -133,7 +137,7 @@ void Net::back_Prop(const std::vector<double>& targetVals)//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿
 	}
 }
 
-void Net::save_weight_and_topology(std::string path)//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
+void Net::save_weight_and_topology(std::string path)//Saving the Neuron Network topology and synapse weights to a text file\ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
 {
 	std::ofstream file;
 	file.open(path);
@@ -156,3 +160,129 @@ void Net::save_weight_and_topology(std::string path)//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿
 		}
 	}
 }
+
+void Net::trening(std::vector<double>& inputVals, std::vector<double>& targetVals, unsigned int epoch)//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+{
+	assert(inputVals.size() % targetVals.size() == layers[0].size() % layers.back().size());
+
+	int extra_in = 0;
+	int extra_out = 0;
+
+	std::vector<double> input;
+	std::vector<double> output;
+	/*
+	for (; it != inputVals.end(); it++)//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+	{
+		input.push_back(it->second);
+	}
+
+	for (; its != targetVals.end(); its++)//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+	{
+		output.push_back(its->second);
+	}
+	*/
+	for (unsigned int numEpoch = 0; numEpoch < epoch; numEpoch++)
+	{
+		extra_in = 0;
+		extra_out = 0;
+		for (int numSet = 0; numSet < (inputVals.size() / layers[0].size()); numSet++)
+		{
+			input.clear();
+			output.clear();
+			for (int numNeuron = 0 + extra_in; numNeuron < (layers[0].size() + extra_in); ++numNeuron)
+			{
+				input.push_back(inputVals[numNeuron]);
+			}
+			for (int numNeuron = 0 + extra_out; numNeuron < (layers.back().size() + extra_out); ++numNeuron)
+			{
+				output.push_back(targetVals[numNeuron]);
+			}
+			extra_in += layers[0].size();
+			extra_out += layers.back().size();
+			feedForward(input);
+			getResults();
+			std::cout << "\nError = " << findError(output) * 100 << "%\n";
+			for (int numNeuron = 0; numNeuron < layers[0].size(); ++numNeuron)
+			{
+				std::cout << "\nInput value " << numNeuron + 1 << ": " << input[numNeuron];
+			}
+			for (int numNeuron = 0; numNeuron < layers.back().size(); ++numNeuron)
+			{
+				std::cout << " | Ideal output value " << numNeuron + 1 << ": " << output[numNeuron];
+			}
+			std::cout << "\nIterration number " << numSet + 1 << "----------------------------------------------\n\n";
+			back_Prop(output);
+		}
+	}
+	std::string answer;
+	std::cout << "\nSave weights of synapses? (yes/no)" << std::endl;
+	std::cin >> answer;
+	if (answer == "yes" || answer == "Yes" || answer == "YES")
+	{
+		save_weight_and_topology("Weights.txt");
+	}
+	else
+	{
+		return;
+	}
+}
+
+
+//ï¿½ï¿½ï¿½ï¿½ï¿½: ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ void Net::trening ï¿½ map
+/*
+void Net::trening(std::map<char, double>& inputVals, std::map<char, double>& targetVals, unsigned int epoch)//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+{
+	//int extra = layers.size() - 1;
+
+	std::map <char, double>::iterator it = inputVals.begin();
+	std::map <char, double>::iterator its = targetVals.begin();
+
+	std::vector<double> input;
+	std::vector<double> output;
+	/*
+	for (; it != inputVals.end(); it++)//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+	{
+		input.push_back(it->second);
+	}
+
+	for (; its != targetVals.end(); its++)//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+	{
+		output.push_back(its->second);
+	}
+	for (unsigned int numEpoch = 0; numEpoch < epoch; numEpoch++)
+	{
+		it = inputVals.begin();
+		its = targetVals.begin();
+		for (int numSet = 0; numSet < inputVals.size(); numSet++)
+		{
+			input.clear();
+			output.clear();
+			for (int numNeuron = 0; numNeuron < layers[0].size(); ++numNeuron, it++, its++)
+			{
+				input.push_back(it->second);
+				output.push_back(its->second);
+			}
+			feedForward(input);
+			getResults();
+			std::cout << " | Error = " << findError(output) * 100 << "%\n";
+			for (int numNeuron = 0; numNeuron < layers[0].size(); ++numNeuron)
+			{
+				std::cout << "\nInput value: " << input[numNeuron] << " | Ideal output value: " << output[numNeuron];
+			}
+			std::cout << "\nIterration number " << numSet + 1 << "----------------------------------------------\n\n";
+			back_Prop(output);
+		}
+	}
+	std::string answer;
+	std::cout << "\nSave weights of synapses? (yes/no)" << std::endl;
+	std::cin >> answer;
+	if (answer == "yes" || answer == "Yes" || answer == "YES")
+	{
+		save_weight_and_topology("Weights.txt");
+	}
+	else
+	{
+		return;
+	}
+}
+*/
