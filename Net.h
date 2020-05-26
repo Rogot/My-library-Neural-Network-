@@ -13,8 +13,7 @@ In this project was been used method of back propagation.
 #include <fstream>
 #include <string>
 
-
-double Neuron::epsi = 0.5;
+double Neuron::epsi = 40;
 double Neuron::alpha = 0.5;
 
 class Net
@@ -33,6 +32,8 @@ public:
 	void save_weight_and_topology(std::string path);//���������� ��������� �� � ����� �������� � ��������� ����
 	void trening(std::vector<double>& inputVals, std::vector<double>& targetVals, unsigned int epoch);//�������� �� �� ������
 
+	void setEpsi(double value);//������ epsi
+	void setAlpha(double value);//������ alpha
 };
 
 
@@ -50,6 +51,9 @@ Net::Net(std::vector<int>& topology)
 			layers.back().back().setOutputVals(neuroneNum);
 		}
 	}
+
+	Neuron::epsi = 40;
+	Neuron::alpha = 0.5;
 
 	this->Error = 0.0;
 }
@@ -200,18 +204,21 @@ void Net::trening(std::vector<double>& inputVals, std::vector<double>& targetVal
 			extra_in += layers[0].size();
 			extra_out += layers.back().size();
 			feedForward(input);
-			getResults();
-			std::cout << "\nError = " << findError(output) * 100 << "%\n";
-			for (int numNeuron = 0; numNeuron < layers[0].size(); ++numNeuron)
+			if (numEpoch == epoch - 1)
 			{
-				std::cout << "\nInput value " << numNeuron + 1 << ": " << input[numNeuron];
+				getResults();
+				std::cout << "\nError = " << findError(output) * 100 << "%\n";
+				for (int numNeuron = 0; numNeuron < layers[0].size(); ++numNeuron)
+				{
+					std::cout << "\nInput value " << numNeuron + 1 << ": " << input[numNeuron];
+				}
+				for (int numNeuron = 0; numNeuron < layers.back().size(); ++numNeuron)
+				{
+					std::cout << " | Ideal output value " << numNeuron + 1 << ": " << output[numNeuron];
+				}
+				std::cout << "\nIterration number " << numSet + 1 << "----------------------------------------------\n\n";
 			}
-			for (int numNeuron = 0; numNeuron < layers.back().size(); ++numNeuron)
-			{
-				std::cout << " | Ideal output value " << numNeuron + 1 << ": " << output[numNeuron];
-			}
-			std::cout << "\nIterration number " << numSet + 1 << "----------------------------------------------\n\n";
-			back_Prop(output);
+				back_Prop(output);
 		}
 	}
 	std::string answer;
@@ -228,61 +235,12 @@ void Net::trening(std::vector<double>& inputVals, std::vector<double>& targetVal
 }
 
 
-//�����: ������� void Net::trening � map
-/*
-void Net::trening(std::map<char, double>& inputVals, std::map<char, double>& targetVals, unsigned int epoch)//�������� �� �� ������
+void Net::setEpsi(double value)
 {
-	//int extra = layers.size() - 1;
-
-	std::map <char, double>::iterator it = inputVals.begin();
-	std::map <char, double>::iterator its = targetVals.begin();
-
-	std::vector<double> input;
-	std::vector<double> output;
-	/*
-	for (; it != inputVals.end(); it++)//���������� ������� ������� ������ �������
-	{
-		input.push_back(it->second);
-	}
-
-	for (; its != targetVals.end(); its++)//���������� ������� �������� ������ �������
-	{
-		output.push_back(its->second);
-	}
-	for (unsigned int numEpoch = 0; numEpoch < epoch; numEpoch++)
-	{
-		it = inputVals.begin();
-		its = targetVals.begin();
-		for (int numSet = 0; numSet < inputVals.size(); numSet++)
-		{
-			input.clear();
-			output.clear();
-			for (int numNeuron = 0; numNeuron < layers[0].size(); ++numNeuron, it++, its++)
-			{
-				input.push_back(it->second);
-				output.push_back(its->second);
-			}
-			feedForward(input);
-			getResults();
-			std::cout << " | Error = " << findError(output) * 100 << "%\n";
-			for (int numNeuron = 0; numNeuron < layers[0].size(); ++numNeuron)
-			{
-				std::cout << "\nInput value: " << input[numNeuron] << " | Ideal output value: " << output[numNeuron];
-			}
-			std::cout << "\nIterration number " << numSet + 1 << "----------------------------------------------\n\n";
-			back_Prop(output);
-		}
-	}
-	std::string answer;
-	std::cout << "\nSave weights of synapses? (yes/no)" << std::endl;
-	std::cin >> answer;
-	if (answer == "yes" || answer == "Yes" || answer == "YES")
-	{
-		save_weight_and_topology("Weights.txt");
-	}
-	else
-	{
-		return;
-	}
+	Neuron::epsi = value;
 }
-*/
+
+void Net::setAlpha(double value)
+{
+	Neuron::alpha = value;
+}
